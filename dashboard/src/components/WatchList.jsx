@@ -6,7 +6,10 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 
+import GeneralContext from "./GeneralContext";
+
 import { watchlist } from '../Data/data';
+import { useContext } from 'react';
 
 const WatchList = () => {
   return (
@@ -60,13 +63,19 @@ const WatchListItem = ({ stock ,idx }) => {
 }
 
 const WatchListActions = ({ uid }) => {
+   const generalContext = useContext(GeneralContext);
+
+  const handleBuyClick = () => {
+    generalContext.openBuyWindow(uid);
+  };
+
   return(
     <span className='actions' key={uid}>
       <span>
         <Tooltip
-          title="Buy (B)" placement='top' arrow slots={{ transition: Grow }}
+          title="Buy (B)" placement='top' arrow slots={{ transition: Grow }} onClick={handleBuyClick}
         >
-          <button className='buy'>Buy</button>
+          <button className='buy' >Buy</button>
         </Tooltip>
         <Tooltip
           title="Sell (s)" placement='top' arrow slots={{ transition: Grow }}

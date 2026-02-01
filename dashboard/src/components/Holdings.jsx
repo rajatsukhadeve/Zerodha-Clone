@@ -1,6 +1,20 @@
-import { holdings } from "../Data/data";
+import { useState, useEffect } from "react";
+import axios  from 'axios';
 
 const Holdings = () => {
+  let [holdings, setHoldings] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://localhost:8080/allHoldings')
+    .then((res)=>{
+      setHoldings(res.data);
+    })
+    .catch((err)=>{
+      console.error("feild to load holdings" , err);
+      
+    });
+  }, []);
+
   return (
     <>
       <h3 className="title">Holdings ({holdings.length})</h3>
