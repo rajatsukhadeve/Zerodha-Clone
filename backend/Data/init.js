@@ -1,9 +1,11 @@
 require('dotenv').config({ path: '../.env' });
 
 const mongoose = require('mongoose');
-let { holdings,positions } = require('./data');
+let { holdings,positions,watchlist } = require('./data');
 const {HoldingsModel} = require("../models/HoldingsModel");
 const {PositionsModel} = require("../models/PositionsModel");
+const {WatchlistModel} = require('../models/WatchListModel');
+
 
 
 const MONGO_URI = process.env.MONGO_URL;
@@ -16,7 +18,7 @@ async function initDB() {
        
 
         // Insert new data
-        await PositionsModel.insertMany(positions);
+        await WatchlistModel.insertMany(watchlist);
         console.log("Holdings inserted successfully");
 
         process.exit(0);

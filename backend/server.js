@@ -5,6 +5,7 @@ const PORT = process.env.PORT || 8080;
 const{HoldingsModel} = require('./models/HoldingsModel');
 const {PositionsModel} = require('./models/PositionsModel');
 const {OrdersModel} = require('./models/OrdersModel');
+const {WatchlistModel} = require('./models/WatchListModel');
 const cors = require('cors');
 
 const app = express();
@@ -36,6 +37,13 @@ app.get('/allPositions' ,async(req,res)=>{
   let allPostitions = await PositionsModel.find({});
   res.json(allPostitions);
 });
+
+
+app.get('/allwatchlist' ,async(req,res)=>{
+  let allwatchlist = await WatchlistModel.find({});
+  res.json(allwatchlist);
+});
+
 
 app.post("/newOrder",async(req,res)=>{
   const order = new OrdersModel({...req.body}); 

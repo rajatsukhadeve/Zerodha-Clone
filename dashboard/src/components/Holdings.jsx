@@ -1,19 +1,33 @@
 import { useState, useEffect } from "react";
-import axios  from 'axios';
+import axios from 'axios';
+import { VerticalGraph } from "./VerticalGraph";
 
 const Holdings = () => {
   let [holdings, setHoldings] = useState([]);
 
   useEffect(() => {
     axios.get('http://localhost:8080/allHoldings')
-    .then((res)=>{
-      setHoldings(res.data);
-    })
-    .catch((err)=>{
-      console.error("feild to load holdings" , err);
-      
-    });
+      .then((res) => {
+        setHoldings(res.data);
+      })
+      .catch((err) => {
+        console.error("field to load holdings", err);
+
+      });
   }, []);
+
+  const labels = holdings.map((subArray) => subArray["name"]);
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: 'stock price',
+        data: holdings.map((stock) =>stock.price ),
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      }
+    ]
+  }
 
   return (
     <>
@@ -72,6 +86,7 @@ const Holdings = () => {
           <p>P&L</p>
         </div>
       </div>
+      <VerticalGraph data={data} />
     </>
   );
 };
