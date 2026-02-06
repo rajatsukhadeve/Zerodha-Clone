@@ -6,7 +6,7 @@ const Holdings = () => {
   let [holdings, setHoldings] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/allHoldings')
+    axios.get('http://localhost:8080/allHoldings',{ withCredentials: true })
       .then((res) => {
         setHoldings(res.data);
       })

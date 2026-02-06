@@ -9,7 +9,7 @@ const Positions = () => {
   useEffect(()=>{
     const fetchData =async()=>{
       try{
-        const res = await axios.get("http://localhost:8080/allPositions");
+        const res = await axios.get("http://localhost:8080/allPositions",{ withCredentials: true });
         setAllPositions(res.data);
       }catch(e){
         console.error("failed to load positions",e);

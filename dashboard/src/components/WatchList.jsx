@@ -20,7 +20,7 @@ const WatchList = () => {
   useEffect(() => {
     const fetchData =async()=>{
       try{
-        const res =await axios.get("http://localhost:8080/allwatchlist");
+        const res =await axios.get("http://localhost:8080/allwatchlist",{ withCredentials: true });
         setWatchList(res.data);
       }catch(err){
         console.error(err);

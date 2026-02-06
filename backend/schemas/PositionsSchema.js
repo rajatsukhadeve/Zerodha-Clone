@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const PositionsSchema = new mongoose.Schema({
+const PositionsSchema = new Schema({
     product: String,
     name: String,
     qty: Number,
@@ -9,7 +10,7 @@ const PositionsSchema = new mongoose.Schema({
     net: String,
     day: String,
     isLoss: Boolean,
-
+    user: { type: Schema.Types.ObjectId, ref: "User" } // <--- ADD THIS
 });
 
 module.exports = { PositionsSchema };

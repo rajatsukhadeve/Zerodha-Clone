@@ -1,19 +1,17 @@
-// frontend/src/landing_page/signup/Signup.jsx
+// frontend/src/landing_page/login/Login.jsx
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function Signup() {
-  const navigate = useNavigate();
+function Login() {
   const [inputValue, setInputValue] = useState({
-    email: "",
     username: "",
     password: "",
   });
   
-  const { email, username, password } = inputValue;
+  const { username, password } = inputValue;
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +30,7 @@ function Signup() {
     e.preventDefault();
     try {
       const { data } = await axios.post(
-        "http://localhost:8080/signup",
+        "http://localhost:8080/login",
         { ...inputValue },
         { withCredentials: true }
       );
@@ -41,14 +39,15 @@ function Signup() {
       if (success) {
         toast.success(message, { position: "bottom-left" });
         setTimeout(() => {
-          navigate("/login"); // Redirect to Login page after signup
+          // REDIRECT TO DASHBOARD (Change port 5173 if your dashboard is different)
+          window.location.href = "http://localhost:5173/"; 
         }, 1000);
       } else {
         toast.error(message);
       }
     } catch (error) {
       console.log(error);
-      handleError("Signup failed. Try again.");
+      handleError("Invalid username or password");
     }
   };
 
@@ -56,22 +55,9 @@ function Signup() {
     <div className="container mt-5">
       <div className="row justify-content-center">
         <div className="col-md-6 col-lg-4">
-           <div className="p-4 border rounded shadow-sm bg-white">
-            <h2 className="text-center mb-4">Sign Up</h2>
-            <p className="text-muted text-center mb-4">Track your investments with Zerodha.</p>
+          <div className="p-4 border rounded shadow-sm bg-white">
+            <h2 className="text-center mb-4">Login</h2>
             <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={email}
-                  className="form-control"
-                  placeholder="Enter your email"
-                  onChange={handleOnChange}
-                  required
-                />
-              </div>
               <div className="mb-3">
                 <label htmlFor="username" className="form-label">Username</label>
                 <input
@@ -96,11 +82,11 @@ function Signup() {
                   required
                 />
               </div>
-              <button type="submit" className="btn btn-primary w-100">Sign Up</button>
+              <button type="submit" className="btn btn-primary w-100">Login</button>
             </form>
             <div className="mt-3 text-center">
-              <span className="text-muted">Already have an account? </span>
-              <Link to="/login" className="text-decoration-none">Login</Link>
+              <span className="text-muted">Don't have an account? </span>
+              <Link to="/signup" className="text-decoration-none">Sign Up</Link>
             </div>
           </div>
         </div>
@@ -110,4 +96,4 @@ function Signup() {
   );
 }
 
-export default Signup;
+export default Login;
