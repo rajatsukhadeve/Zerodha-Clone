@@ -5,6 +5,9 @@ const cors = require('cors');
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const YahooFinance = require("yahoo-finance2").default;
+
+const yahooFinance = new YahooFinance();
 
 // Models
 const { HoldingsModel } = require('./models/HoldingsModel');
@@ -73,7 +76,7 @@ app.post("/signup", async (req, res) => {
         let { username, email, password } = req.body;
         let newUser = new User({ email, username });
         let registeredUser = await User.register(newUser, password);
-        
+
         console.log("2. User created:", registeredUser._id); // <--- DEBUG LOG
 
         // --- SEED DEFAULT DATA ---
@@ -82,11 +85,11 @@ app.post("/signup", async (req, res) => {
         const mappedWatchlist = watchlist.map(item => ({ ...item, user: registeredUser._id }));
 
         console.log("3. Seeding data..."); // <--- DEBUG LOG
-        
+
         await HoldingsModel.insertMany(mappedHoldings);
         await PositionsModel.insertMany(mappedPositions);
         await WatchlistModel.insertMany(mappedWatchlist);
-        
+
         console.log("4. Data seeded successfully!"); // <--- DEBUG LOG
         // -------------------------
 
@@ -132,11 +135,57 @@ app.get('/allwatchlist', isLoggedIn, async (req, res) => {
 app.post("/newOrder", isLoggedIn, async (req, res) => {
     const newOrder = new OrdersModel({
         ...req.body,
-        user: req.user._id 
+        user: req.user._id
     });
     await newOrder.save();
     res.send("Order saved");
 });
+
+// for stock search 
+
+app.get("/search/:stockName", async (req, res) => {
+  try {
+    const stockName = req.params.stockName.toUpperCase();
+    const symbol = stockName + ".NS"; // For NSE stocks
+
+    // 📅 6 months ago date
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    // 🔹 Get historical daily data
+    const historicalData = await yahooFinance.historical(symbol, {
+      period1: sixMonthsAgo,
+      period2: new Date(),
+      interval: "1d"
+    });
+
+    // 🔹 Get current/latest price
+    const quote = await yahooFinance.quote(symbol);
+
+    // Format historical data
+    const formattedHistory = historicalData
+      .filter(item => item.close !== null)
+      .map(item => ({
+        date: item.date.toISOString().split("T")[0],
+        price: item.close
+      }));
+
+    // Final response
+    res.json({
+      currentPrice: quote.regularMarketPrice,
+      todayOpen: quote.regularMarketOpen,
+      todayHigh: quote.regularMarketHigh,
+      todayLow: quote.regularMarketLow,
+      previousClose: quote.regularMarketPreviousClose,
+      history: formattedHistory
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.listen(PORT, () => {
     console.log(`App is running on ${PORT}`);
