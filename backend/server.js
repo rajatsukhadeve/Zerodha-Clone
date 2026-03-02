@@ -98,8 +98,15 @@ app.post("/signup", async (req, res) => {
             res.json({ success: true, message: "User registered and data initialized!" });
         });
     } catch (e) {
-        console.log("ERROR in Signup:", e); // <--- DEBUG LOG
-        res.status(400).send(e.message);
+        if (e.name === "UserExistsError") {
+            return res.status(400).json({
+                success: false,
+                message: "Username already exists. Please choose another."
+            });
+        }
+
+        console.log("ERROR in Signup:", e);
+        res.status(400).json({ success: false, message: e.message });
     }
 });
 
@@ -144,46 +151,46 @@ app.post("/newOrder", isLoggedIn, async (req, res) => {
 // for stock search 
 
 app.get("/search/:stockName", async (req, res) => {
-  try {
-    const stockName = req.params.stockName.toUpperCase();
-    const symbol = stockName + ".NS"; // For NSE stocks
+    try {
+        const stockName = req.params.stockName.toUpperCase();
+        const symbol = stockName + ".NS"; // For NSE stocks
 
-    // 📅 6 months ago date
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        // 📅 6 months ago date
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    // 🔹 Get historical daily data
-    const historicalData = await yahooFinance.historical(symbol, {
-      period1: sixMonthsAgo,
-      period2: new Date(),
-      interval: "1d"
-    });
+        // 🔹 Get historical daily data
+        const historicalData = await yahooFinance.historical(symbol, {
+            period1: sixMonthsAgo,
+            period2: new Date(),
+            interval: "1d"
+        });
 
-    // 🔹 Get current/latest price
-    const quote = await yahooFinance.quote(symbol);
+        // 🔹 Get current/latest price
+        const quote = await yahooFinance.quote(symbol);
 
-    // Format historical data
-    const formattedHistory = historicalData
-      .filter(item => item.close !== null)
-      .map(item => ({
-        date: item.date.toISOString().split("T")[0],
-        price: item.close
-      }));
+        // Format historical data
+        const formattedHistory = historicalData
+            .filter(item => item.close !== null)
+            .map(item => ({
+                date: item.date.toISOString().split("T")[0],
+                price: item.close
+            }));
 
-    // Final response
-    res.json({
-      currentPrice: quote.regularMarketPrice,
-      todayOpen: quote.regularMarketOpen,
-      todayHigh: quote.regularMarketHigh,
-      todayLow: quote.regularMarketLow,
-      previousClose: quote.regularMarketPreviousClose,
-      history: formattedHistory
-    });
+        // Final response
+        res.json({
+            currentPrice: quote.regularMarketPrice,
+            todayOpen: quote.regularMarketOpen,
+            todayHigh: quote.regularMarketHigh,
+            todayLow: quote.regularMarketLow,
+            previousClose: quote.regularMarketPreviousClose,
+            history: formattedHistory
+        });
 
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: error.message });
-  }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 
