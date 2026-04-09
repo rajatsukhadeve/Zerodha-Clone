@@ -7,6 +7,10 @@ const UserSchema = new Schema({
     email: {
         type: String,
         required: true,
+    },
+    balance: {
+        type: Number,
+        default: 10000 // starting demo money
     }
 });
 

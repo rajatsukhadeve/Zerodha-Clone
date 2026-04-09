@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
 import axios from "axios";
 import { toast } from "react-toastify";
+import SearchBar from "./SearchBar";
 
 const Menu = () => {
     const [selectedMenu, setSelectedMenu] = useState(0);
@@ -37,6 +38,7 @@ const Menu = () => {
     return (
         <div className="menu-container">
             <img src="logo.png" style={{ width: "50px" }} alt="Logo" />
+            
             <div className="menus">
                 <ul>
                     <li>
@@ -64,20 +66,15 @@ const Menu = () => {
                             <p className={selectedMenu === 4 ? activeMenuClass : menuClass}>Funds</p>
                         </Link>
                     </li>
-                    <li>
-                        <Link to="/apps" style={{ textDecoration: "none" }} onClick={() => handleMenuClick(5)}>
-                            <p className={selectedMenu === 5 ? activeMenuClass : menuClass}>Apps</p>
-                        </Link>
-                    </li>
+                    
                 </ul>
                 <hr />
 
-                {/* --- UPDATED PROFILE SECTION --- */}
+                
                 <div className="profile" onClick={handleProfileClick} style={{ cursor: "pointer", position: "relative" }}>
                     <div className="avatar">ZU</div>
                     <p className="username">USERID</p>
 
-                    {/* Dropdown Menu */}
                     {isDropdownOpen && (
                         <div
                             style={{

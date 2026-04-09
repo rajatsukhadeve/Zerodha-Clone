@@ -1,13 +1,9 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import React, { useState, useContext } from "react";
 import axios from "axios";
-
-import { useContext } from "react";
 import GeneralContext from "./GeneralContext";
-import "./BuyActionWindow.css";
+import "./BuyActionWindow.css"; // reuse same CSS
 
-const BuyActionWindow = ({ uid }) => {
+const SellActionWindow = ({ uid }) => {
     const { name, price } = uid;
     const generalContext = useContext(GeneralContext);
 
@@ -15,27 +11,29 @@ const BuyActionWindow = ({ uid }) => {
 
     const orderValue = stockQuantity * price;
 
-    const handleBuyClick = async () => {
+    const handleSellClick = async () => {
         try {
-            await axios.post('http://localhost:8080/buy', {
+            if (stockQuantity <= 0) return;
+
+            await axios.post("http://localhost:8080/sell", {
                 name,
                 qty: Number(stockQuantity),
                 price
             }, { withCredentials: true });
 
-            generalContext.closeBuyWindow();
+            generalContext.closeSellWindow();
 
         } catch (err) {
-            console.error(err);
+            alert(err.response?.data?.error || "Sell failed");
         }
     };
 
     const handleCancelClick = () => {
-        generalContext.closeBuyWindow();
+        generalContext.closeSellWindow();
     };
 
     return (
-        <div className="container" id="buy-window">
+        <div className="container" id="sell-window">
             <div className="regular-order">
                 <div className="inputs">
                     <fieldset>
@@ -54,8 +52,8 @@ const BuyActionWindow = ({ uid }) => {
                 <span>Order Value ₹{orderValue.toFixed(2)}</span>
 
                 <div>
-                    <button className="btn btn-blue" onClick={handleBuyClick}>
-                        Buy
+                    <button className="btn btn-red" onClick={handleSellClick}>
+                        Sell
                     </button>
                     <button className="btn btn-grey" onClick={handleCancelClick}>
                         Cancel
@@ -66,4 +64,4 @@ const BuyActionWindow = ({ uid }) => {
     );
 };
 
-export default BuyActionWindow;
+export default SellActionWindow;

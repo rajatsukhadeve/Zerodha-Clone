@@ -10,7 +10,7 @@ const Orders = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/allOrders",{ withCredentials: true });
+        const res = await axios.get("http://localhost:8080/orders",{ withCredentials: true });
         setOrders(res.data);
       } catch (err) {
         console.error('failed to load orders', err);
@@ -35,7 +35,7 @@ const Orders = () => {
             <tr>
               <th>Name</th>
               <th>Qty</th>
-              <th>Price</th>
+              <th>Order Price</th>
               <th>Mode</th>
             </tr>
 

@@ -12,17 +12,18 @@ import GeneralContext from "./GeneralContext";
 
 import { useContext } from 'react';
 import { PieGraph } from './PieGraph';
+import { useNavigate } from 'react-router-dom';
 
 const WatchList = () => {
 
   let [watchlist, setWatchList] = useState([]);
 
   useEffect(() => {
-    const fetchData =async()=>{
-      try{
-        const res =await axios.get("http://localhost:8080/allwatchlist",{ withCredentials: true });
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/allwatchlist", { withCredentials: true });
         setWatchList(res.data);
-      }catch(err){
+      } catch (err) {
         console.error(err);
       }
     }
@@ -103,46 +104,46 @@ const WatchListItem = ({ stock, idx }) => {
           <span className='price'> {stock.price}</span>
         </div>
       </div>
-      {showWatchListItem && <WatchListActions uid={stock.name} />}
+      {showWatchListItem && <WatchListActions name={stock.name} price={stock.price} />}
     </li>
   )
 }
 
-const WatchListActions = ({ uid }) => {
+const WatchListActions = ({ name, price }) => {
   const generalContext = useContext(GeneralContext);
+  const navigate = useNavigate();
 
   const handleBuyClick = () => {
-    generalContext.openBuyWindow(uid);
+    // ✅ send object
+    generalContext.openBuyWindow({ name, price });
+  };
+  const handleSellClick = () => {
+    generalContext.openSellWindow({ name, price });
+  };
+
+  const handleAnalytics = () => {
+    if (name.trim()) {
+      navigate(`/stock/${name.trim().toUpperCase()}`);
+    }
   };
 
   return (
-    <span className='actions' key={uid}>
+    <span className='actions'>
       <span>
-        <Tooltip
-          title="Buy (B)" placement='top' arrow slots={{ transition: Grow }} onClick={handleBuyClick}
-        >
-          <button className='buy' >Buy</button>
+        <Tooltip title="Buy (B)" placement='top' arrow slots={{ transition: Grow }}>
+          <button className='buy' onClick={handleBuyClick}>Buy</button>
         </Tooltip>
-        <Tooltip
-          title="Sell (s)" placement='top' arrow slots={{ transition: Grow }}
-        >
-          <button className='sell'>Sell</button>
+
+        <Tooltip title="Sell (S)" placement='top' arrow slots={{ transition: Grow }}>
+          <button className='sell' onClick={handleSellClick}>Sell</button>
         </Tooltip>
-        <Tooltip
-          title="Analytics (A)" placement='top' arrow slots={{ transition: Grow }}
-        >
-          <button className='action'>
+
+        <Tooltip title="Analytics (A)" placement='top' arrow slots={{ transition: Grow }}>
+          <button className='action' onClick={handleAnalytics}>
             <BarChartOutlinedIcon className='icon' />
-          </button>
-        </Tooltip>
-        <Tooltip
-          title="More" placement='top' arrow slots={{ transition: Grow }}
-        >
-          <button className='action'>
-            <MoreHoriz className='icon' />
           </button>
         </Tooltip>
       </span>
     </span>
-  )
-}
+  );
+};

@@ -29,6 +29,17 @@ const Holdings = () => {
     ]
   }
 
+  const totalInvestment = holdings.reduce((total , stock)=>{
+    return total + (stock.avg * stock.qty);
+  },0);
+
+  const totalCurrVal = holdings.reduce((total,stock)=>{
+    return total+(stock.price*stock.qty);
+  },0);
+
+  const pnl = totalCurrVal - totalInvestment;
+  const pnlPercent = (pnl/totalInvestment)*100;
+
   return (
     <>
       <h3 className="title">Holdings ({holdings.length})</h3>
@@ -71,18 +82,18 @@ const Holdings = () => {
       <div className="row">
         <div className="col">
           <h5>
-            29,875.<span>55</span>{" "}
+            {totalInvestment.toFixed(2)}
           </h5>
           <p>Total investment</p>
         </div>
         <div className="col">
           <h5>
-            31,428.<span>95</span>{" "}
+            {totalCurrVal.toFixed(2)}
           </h5>
           <p>Current value</p>
         </div>
         <div className="col">
-          <h5>1,553.40 (+5.20%)</h5>
+          <h5 style={{ color: pnlPercent > 0 ? "green" : "red" }}>{`${pnl.toFixed(2)} (${pnlPercent.toFixed(2)}%)`}</h5>
           <p>P&L</p>
         </div>
       </div>

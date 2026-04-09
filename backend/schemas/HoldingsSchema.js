@@ -12,3 +12,4 @@ const HoldingSchema = new Schema({
 });
 
 module.exports = { HoldingSchema };
+

@@ -1,6 +1,38 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const Summary = () => {
+  const [holdings, setHoldings] = useState([]);
+
+  useEffect(() => {
+    const fetchHoldings = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/allHoldings", {
+          withCredentials: true,
+        });
+        setHoldings(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchHoldings();
+  }, []);
+
+  // 🔥 CALCULATIONS
+  let investment = 0;
+  let currentValue = 0;
+
+  holdings.forEach((stock) => {
+    investment += stock.avg * stock.qty;
+    currentValue += stock.price * stock.qty;
+  });
+
+  const pnl = currentValue - investment;
+  const percent = investment
+    ? ((pnl / investment) * 100).toFixed(2)
+    : 0;
+
   return (
     <>
       <div className="username">
@@ -8,6 +40,7 @@ const Summary = () => {
         <hr className="divider" />
       </div>
 
+      {/* EQUITY SECTION (optional static for now) */}
       <div className="section">
         <span>
           <p>Equity</p>
@@ -15,43 +48,47 @@ const Summary = () => {
 
         <div className="data">
           <div className="first">
-            <h3>3.74k</h3>
-            <p>Margin available</p>
+            <h3>₹{currentValue.toFixed(2)}</h3>
+            <p>Current Value</p>
           </div>
           <hr />
 
           <div className="second">
             <p>
-              Margins used <span>0</span>{" "}
+              Investment <span>₹{investment.toFixed(2)}</span>
             </p>
             <p>
-              Opening balance <span>3.74k</span>{" "}
+              P&amp;L{" "}
+              <span className={pnl >= 0 ? "profit" : "loss"}>
+                ₹{pnl.toFixed(2)} ({percent}%)
+              </span>
             </p>
           </div>
         </div>
         <hr className="divider" />
       </div>
 
+      {/* HOLDINGS SECTION */}
       <div className="section">
         <span>
-          <p>Holdings (13)</p>
+          <p>Holdings ({holdings.length})</p>
         </span>
 
         <div className="data">
           <div className="first">
-            <h3 className="profit">
-              1.55k <small>+5.20%</small>{" "}
+            <h3 className={pnl >= 0 ? "profit" : "loss"}>
+              ₹{pnl.toFixed(2)} <small>{percent}%</small>
             </h3>
-            <p>P&L</p>
+            <p>P&amp;L</p>
           </div>
           <hr />
 
           <div className="second">
             <p>
-              Current Value <span>31.43k</span>{" "}
+              Current Value <span>₹{currentValue.toFixed(2)}</span>
             </p>
             <p>
-              Investment <span>29.88k</span>{" "}
+              Investment <span>₹{investment.toFixed(2)}</span>
             </p>
           </div>
         </div>

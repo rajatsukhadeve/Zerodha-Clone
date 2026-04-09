@@ -1,88 +1,147 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const Funds = () => {
-  return (
-    <>
-      <div className="funds">
-        <p>Instant, zero-cost fund transfers with UPI </p>
-        <Link className="btn btn-green">Add funds</Link>
-        <Link className="btn btn-blue">Withdraw</Link>
-      </div>
+  const [holdings, setHoldings] = useState([]);
+  const [balance, setBalance] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-      <div className="row">
-        <div className="col">
-          <span>
-            <p>Equity</p>
-          </span>
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-          <div className="table">
-            <div className="data">
-              <p>Available margin</p>
-              <p className="imp colored">4,043.10</p>
-            </div>
-            <div className="data">
-              <p>Used margin</p>
-              <p className="imp">3,757.30</p>
-            </div>
-            <div className="data">
-              <p>Available cash</p>
-              <p className="imp">4,043.10</p>
-            </div>
-            <hr />
-            <div className="data">
-              <p>Opening Balance</p>
-              <p>4,043.10</p>
-            </div>
-            <div className="data">
-              <p>Opening Balance</p>
-              <p>3736.40</p>
-            </div>
-            <div className="data">
-              <p>Payin</p>
-              <p>4064.00</p>
-            </div>
-            <div className="data">
-              <p>SPAN</p>
-              <p>0.00</p>
-            </div>
-            <div className="data">
-              <p>Delivery margin</p>
-              <p>0.00</p>
-            </div>
-            <div className="data">
-              <p>Exposure</p>
-              <p>0.00</p>
-            </div>
-            <div className="data">
-              <p>Options premium</p>
-              <p>0.00</p>
-            </div>
-            <hr />
-            <div className="data">
-              <p>Collateral (Liquid funds)</p>
-              <p>0.00</p>
-            </div>
-            <div className="data">
-              <p>Collateral (Equity)</p>
-              <p>0.00</p>
-            </div>
-            <div className="data">
-              <p>Total Collateral</p>
-              <p>0.00</p>
-            </div>
-          </div>
-        </div>
+  const fetchData = async () => {
+    try {
+      const [holdingsRes, balanceRes] = await Promise.all([
+        axios.get("http://localhost:8080/allHoldings", {
+          withCredentials: true,
+        }),
+        axios.get("http://localhost:8080/balance", {   // ✅ FIXED
+          withCredentials: true,
+        }),
+      ]);
 
-        <div className="col">
-          <div className="commodity">
-            <p>You don't have a commodity account</p>
-            <Link className="btn btn-blue">Open Account</Link>
-          </div>
-        </div>
-      </div>
-    </>
+      console.log("Holdings:", holdingsRes.data); // 🔍 DEBUG
+
+      setHoldings(holdingsRes.data || []);
+      setBalance(balanceRes.data.balance || 0);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ ADD FUNDS
+  const handleAddFunds = async () => {
+    const amount = Number(prompt("Enter amount to add"));
+    if (!amount || amount <= 0) return;
+
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/addFunds",
+        { amount },
+        { withCredentials: true }
+      );
+
+      setBalance(res.data.balance);
+    } catch {
+      alert("Failed to add funds");
+    }
+  };
+
+  // ✅ WITHDRAW FUNDS
+  const handleWithdraw = async () => {
+    const amount = Number(prompt("Enter amount to withdraw"));
+    if (!amount || amount <= 0) return;
+
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/withdrawFunds",
+        { amount },
+        { withCredentials: true }
+      );
+
+      setBalance(res.data.balance);
+    } catch (err) {
+      alert(err.response?.data?.error || "Withdraw failed");
+    }
+  };
+
+  // ✅ SAFE CALCULATIONS
+  const invested = holdings.reduce(
+    (sum, stock) => sum + ((stock.qty || 0) * (stock.avg || 0)),
+    0
   );
+
+  const currentValue = holdings.reduce(
+    (sum, stock) => sum + ((stock.qty || 0) * (stock.price ?? stock.avg ?? 0)),
+    0
+  );
+
+  const totalValue = balance + currentValue;
+
+  if (loading) return <h2 style={{ textAlign: "center" }}>Loading...</h2>;
+
+  return (
+    <div style={{ padding: "20px" }}>
+
+      {/* WALLET */}
+      <div style={box}>
+        <h3>Funds</h3>
+        <h1 style={{ color: "#387ed1" }}>₹{balance.toFixed(2)}</h1>
+        <p>Available Balance</p>
+
+        <div style={{ marginTop: "10px" }}>
+          <button className="btn btn-green" onClick={handleAddFunds}>
+            Add Funds
+          </button>
+
+          <button
+            className="btn btn-blue"
+            style={{ marginLeft: "10px" }}
+            onClick={handleWithdraw}
+          >
+            Withdraw
+          </button>
+        </div>
+      </div>
+
+      {/* SUMMARY */}
+      <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
+        <div style={card}>
+          <p>Invested</p>
+          <h2>₹{invested.toFixed(2)}</h2>
+        </div>
+
+        <div style={card}>
+          <p>Current Value</p>
+          <h2>₹{currentValue.toFixed(2)}</h2>
+        </div>
+
+        <div style={card}>
+          <p>Total Value</p>
+          <h2>₹{totalValue.toFixed(2)}</h2>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const box = {
+  padding: "20px",
+  background: "#fff",
+  borderRadius: "8px",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+};
+
+const card = {
+  flex: 1,
+  padding: "15px",
+  background: "#fff",
+  borderRadius: "8px",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
 };
 
 export default Funds;

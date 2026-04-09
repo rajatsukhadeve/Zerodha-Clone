@@ -4,6 +4,7 @@ import "./index.css";
 import Home from "./components/Home";
  // Import Signup
 import PrivateRoute from "./components/PrivateRoute";
+import StockDashboard from "./components/StockDashboard";
 
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
             element={
               <PrivateRoute>
                 <Home />
+
+                
               </PrivateRoute>
             } 
           />
